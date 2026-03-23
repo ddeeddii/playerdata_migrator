@@ -85,6 +85,8 @@ def write_player_data(file_path: Path, data: dict) -> None:
     logging.info(f"successfully wrote player data to {file_path}")
 
   except Exception as e:
+    if e == "Player":
+      e = "player nbt key not found, you probably did not open the world first"
     logging.error(f"error writing to {file_path}: {e}")
 
 def main():
