@@ -56,12 +56,12 @@ This will copy the player data for the player "Notch" from an online server to t
 # FAQ
 
 ## Is it really that complicated?
-Sort of. Minecraft's singleplayer and multiplayer worlds use slightly different formats. Additionally, they also store player data differently (local worlds store it in `level.dat` under the `Player` tag, while servers use `playerdata` folder and match UUIDs).
+Sort of. Minecraft's singleplayer and multiplayer worlds use slightly different formats. Additionally, they also store player data differently (local worlds store it in `level.dat` under the `Player` key, while servers use `playerdata` folder and match UUIDs).
 ## Supported versions?
-Because it leverages automatically generated tags by the game, in theory it should work universally as long as the way NBT data is structured hasn't changed. As a rule of thumb though, it should work on everything modern (made this decade), earlier that point no guarantees. Doesn't support `26.1` or above yet. 
+Because it leverages automatically generated keys by the game, in theory it should work universally as long as the way NBT data is structured hasn't changed. As a rule of thumb though, it should work on everything modern (made this decade), earlier that point no guarantees. Doesn't support `26.1` or above yet. 
 
 ## Can it be done manually?
-Yes. Find your UUID (offline mode uses name based uuids, refer to the function in the script for details) in the `playerdata` folder and copy whatever NBT data you want from there. Paste that into `level.dat`'s `Player` tag.
+Yes. Find your UUID (offline mode uses name based uuids, refer to the function in the script for details) in the `playerdata` folder and copy whatever NBT data you want from there. Paste that into `level.dat`'s `Player` key.
 
 ## Everything worked fine, but item enchants (or names, or lore, etc.) didn't transfer!
 This isn't a problem with the playerdata; you probably migrated a world from an older version into a newer version (for example `1.19` to `1.21`) without letting Minecraft adjust it first. To fix this:
