@@ -66,5 +66,5 @@ Yes. Find your UUID (offline mode uses name based uuids, refer to the function i
 ## Everything worked fine, but item enchants (or names, or lore, etc.) didn't transfer!
 This isn't a problem with the playerdata; you probably migrated a world from an older version into a newer version (for example `1.19` to `1.21`) without letting Minecraft adjust it first. To fix this:
 1. Migrate the world into the correct Minecraft version (the same that was used on the server); in this case a `1.19` server world into `1.19`
-2. Load up into the world on (in this case `1.19`), ensure everything is correct
+2. Load up into the world on the correct version (in this case `1.19`), ensure everything is correct
 3. Now you can import the mod into the newer version, ideally taken gradually (`1.19` -> `1.20` -> `1.21`) though it should still work if you skip some versions (`1.19` directly to `1.21`)
