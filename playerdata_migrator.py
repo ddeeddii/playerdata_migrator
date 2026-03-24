@@ -130,6 +130,7 @@ def main():
   
   if not found_uuid:
     logging.error(f"could not find a player data file matching the probable UUID {probable_uuid}")
+    return
   else:
     logging.info("found uuid")
     
