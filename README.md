@@ -68,3 +68,8 @@ This isn't a problem with the playerdata; you probably migrated a world from an 
 1. Migrate the world into the correct Minecraft version (the same that was used on the server); in this case a `1.19` server world into `1.19`
 2. Load up into the world on the correct version (in this case `1.19`), ensure everything is correct
 3. Now you can import the mod into the newer version, ideally taken gradually (`1.19` -> `1.20` -> `1.21`) though it should still work if you skip some versions (`1.19` directly to `1.21`)
+
+## I can't move!
+This is likely because the server had a login system plugin installed that zeroed all players movement speeds (by using attributes) until they logged in. To fix this:
+1. Open the world to lan and enable commands
+2. Type: `/attribute @p minecraft:movement_speed base reset` (or set it to 0.1) which resets the `movement_speed` attribute back to its original value  
