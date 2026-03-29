@@ -25,8 +25,10 @@ python playerdata_migrator.py <world_path> --name <player_name> [options]
 Use the `-h` or `--help` flag for more information, e.g.: `python playerdata_migrator.py -h`
 
 ## Usage (Preparation)
-1. Install dependencies:
+1. Install the script and dependencies
 ```bash
+git clone https://github.com/ddeeddii/playerdata_migrator
+cd playerdata_migrator
 pip install -r requirements.txt
 ```
 2. Always create a backup of your world before running the script, even though the script backs up the files by default.
