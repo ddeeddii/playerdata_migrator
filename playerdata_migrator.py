@@ -45,6 +45,8 @@ def parse_args():
   
   parser.add_argument("--nobackup", action="store_true", help="If set, the script will not create a backup of the original player data file before writing to it.")
   
+  parser.add_argument("--nofixmovement", action="store_true", help="If set, the script will not fix movement-related issues in the player data.")
+  
   parser.add_argument("--verbose", action="store_true", help="If set, the script will print more detailed information about its operations.")
   
   return parser.parse_args()
@@ -60,15 +62,66 @@ def get_player_data(file_path: Path) -> dict | None:
   
   return None
 
-def write_player_data(file_path: Path, data: dict) -> None:
+DEFAULT_PLAYER_WALK_SPEED = 0.10000000149011612
+
+def fix_movement_issues(server_player_data: dict, server_attributes_key: str | None) -> None:
+  # fix abilities
+  if "abilities" in server_player_data:
+    logging.debug("found abilities ...")
+    if "walkSpeed" in server_player_data["abilities"]:
+      logging.debug("found walkSpeed ability, fixing value ...")
+      server_player_data["abilities"]["walkSpeed"] = nbtlib.Float(DEFAULT_PLAYER_WALK_SPEED)
+    else:
+      logging.debug("walkSpeed ability not found, skipping ...")
+      
+  # fix movement speed attribute
+  if server_attributes_key:
+    logging.debug(f"found {server_attributes_key} ...")
+    for attribute in server_player_data[server_attributes_key]:
+      if attribute["Name"] == "minecraft:generic.movement_speed":
+        logging.debug("found movement_speed attribute, fixing base value ...")
+        attribute["Base"] = nbtlib.Float(DEFAULT_PLAYER_WALK_SPEED)
+        break
+    else:
+      logging.debug("movement_speed attribute not found, skipping ...")
+      
+  logging.info("finished fixing movement-related issues")
+    
+
+def write_player_data(file_path: Path, server_data: dict, fix_movement: bool) -> None:
   try:
     changed_values = []
     
-    nbt_data = nbtlib.load(file_path)
+    client_data = nbtlib.load(file_path)
     
-    for key in nbt_data[""]["Data"]["Player"]:
+    # note; attributes can either be "Attributes" or "attributes",
+    # not sure what determines this, so we check for both 
+    if "Attributes" in server_data:
+      server_attributes_key = "Attributes"
+    elif "attributes" in server_data:
+      server_attributes_key = "attributes"
+    else:
+      logging.debug("did not find attributes key in server data")
+      server_attributes_key = None
+
+    if fix_movement:
+      logging.info("fixing movement-related issues in player data ...")
+      fix_movement_issues(server_data, server_attributes_key)
+    
+    for key in client_data[""]["Data"]["Player"]:
       logging.debug(f"checking key: {key} ...")
-      if key in data:
+
+      # there might be a mismatch where the server used "Attributes" but 
+      # the client uses "attributes" or vice versa, so we check for both 
+      # and write to the one that exists in the client file
+      # yes, this is slightly hacky but it works
+      if server_attributes_key is not None:
+        if key in ["attributes", "Attributes"]:
+          client_data[""]["Data"]["Player"][key] = server_data[server_attributes_key]
+          logging.debug(f"writing {key} to client data ...")
+          changed_values.append(key)
+          
+      if key in server_data:
         logging.debug(f"found matching key: {key}, writing value...")
         
         if key == "UUID": # not sure if this does anything
@@ -76,12 +129,12 @@ def write_player_data(file_path: Path, data: dict) -> None:
           continue
                 
         changed_values.append(key)
-        nbt_data[""]["Data"]["Player"][key] = data[key]
+        client_data[""]["Data"]["Player"][key] = server_data[key]
 
     logging.info(f"changed {len(changed_values)} values")    
     logging.debug(changed_values)
   
-    nbt_data.save(file_path)
+    client_data.save(file_path)
     logging.info(f"successfully wrote player data to {file_path}")
 
   except Exception as e:
@@ -97,6 +150,7 @@ def main():
   path: Path = args.path
   mode: str = args.mode
   level = logging.DEBUG if args.verbose else logging.INFO
+  fix_movement = not args.nofixmovement
   logging.basicConfig(level=level, format='%(message)s')
   
   probable_uuid = uuid_from_string(name, mode)
@@ -106,12 +160,6 @@ def main():
   
   found_uuid = None
   uuid_file_path = None
-  
-  # NOTE: this could fail if the path ends with a "/", so ".../world/" will fail even though
-  # it is still a directory; this will be addressed later
-  if str(path).endswith("/") or str(path).endswith("\\"):
-    logging.debug("path ends with a separator, this may cause issues when looking for player data files; consider removing the trailing separator from the path")
-    return
   
   player_data_dir = path / "playerdata"
   level_data_file = path / "level.dat"
@@ -144,7 +192,7 @@ def main():
     logging.error(f"could not read player data from {uuid_file_path}")
     return
   
-  write_player_data(level_data_file, player_data)
+  write_player_data(level_data_file, player_data, fix_movement)
 
 if __name__ == "__main__":
   main()

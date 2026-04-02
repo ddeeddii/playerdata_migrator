@@ -20,6 +20,7 @@ python playerdata_migrator.py <world_path> --name <player_name> [options]
 | `--name` | The name of the player to process | required |
 | `--mode` | Whether the server was running in `offline` or `online` mode | `offline` |
 | `--nobackup` | Skip creating a backup of the `level.dat` file | false |
+| `--nofixmovement` | Skip the automatic movement speed fix | false |
 | `--verbose` | Print detailed debug information | false |
 
 Use the `-h` or `--help` flag for more information, e.g.: `python playerdata_migrator.py -h`
@@ -72,6 +73,7 @@ This isn't a problem with the playerdata; you probably migrated a world from an 
 3. Now you can import the mod into the newer version, ideally taken gradually (`1.19` -> `1.20` -> `1.21`) though it should still work if you skip some versions (`1.19` directly to `1.21`)
 
 ## I can't move!
-This is likely because the server had a login system plugin installed that zeroed all players movement speeds (by using attributes) until they logged in. To fix this:
+This is likely because the server had a login system plugin installed that zeroed all players movement speeds (by using attributes or abilities) until they logged in. The script will automatically attempt to fix this by modifying the movement speed attribute and ability, but if the problem still persists, you can try the following:
 1. Open the world to lan and enable commands
-2. Type: `/attribute @p minecraft:movement_speed base reset` (or set it to 0.1) which resets the `movement_speed` attribute back to its original value  
+2. Type: `/attribute @p minecraft:movement_speed base reset` (or set it to 0.1) which resets the `movement_speed` attribute back to its original value. Note that this will likely be reset every time you log in.
+3. As a permanent solution, consider manually changing the value with an NBT editor (like NBTExplorer) under the `Data` -> `Player` -> `Attributes` (look for `minecraft:generic.movement_speed`) or `abilities` (look for `walkSpeed`) key in `level.dat`. Set both to `0.1` if they aren't already. 
